@@ -1,42 +1,65 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { useRouter } from 'vue-router'
+import { HomeOutlined, FolderOutlined } from '@ant-design/icons-vue'
+import { Layout, Menu } from 'ant-design-vue'
+
+const { Header, Content, Sider } = Layout
+const router = useRouter()
+
+const handleMenuClick = ({ key }) => {
+  router.push(key)
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <Layout style="min-height: 100vh">
+    <Sider collapsible>
+      <div class="logo">
+        <img src="@/assets/logo.svg" alt="Logo" style="height: 32px; margin: 16px" />
+      </div>
+      <Menu
+        theme="dark"
+        mode="inline"
+        @click="handleMenuClick"
+      >
+        <Menu.Item key="/">
+          <template #icon>
+            <HomeOutlined />
+          </template>
+          首页
+        </Menu.Item>
+        <Menu.Item key="/projects">
+          <template #icon>
+            <FolderOutlined />
+          </template>
+          项目管理
+        </Menu.Item>
+      </Menu>
+    </Sider>
+    <Layout>
+      <Header style="background: #fff; padding: 0 24px">
+        <h2 style="color: #1890ff">金斧头施工后台管理系统</h2>
+      </Header>
+      <Content style="margin: 24px 16px 0">
+        <div style="padding: 24px; background: #fff; min-height: 360px">
+          <RouterView />
+        </div>
+      </Content>
+    </Layout>
+    
+  </Layout>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+<style lang="less" scoped>
+#app {
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
-
 .logo {
-  display: block;
-  margin: 0 auto 2rem;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.1);
+  text-align: center;
 }
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
 
 nav a.router-link-exact-active {
   color: var(--color-text);
