@@ -1,0 +1,22 @@
+// 全局样式变量
+@primary-color: #1890ff;
+@success-color: #52c41a;
+@warning-color: #faad14;
+@error-color: #f5222d;
+
+// 基础样式
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+// 覆盖Ant Design主题
+@ant-prefix: ant;
+
+.@{ant-prefix}-btn {
+  &-primary {
+    background-color: @primary-color;
+    border-color: @primary-color;
+  }
+}
