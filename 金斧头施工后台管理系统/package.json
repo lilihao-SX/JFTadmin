@@ -13,7 +13,6 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@element-plus/icons-vue": "^2.3.1",
     "@supabase/supabase-js": "^2.49.1",
     "ant-design-vue": "^4.0.0",
     "antd": "^5.24.3",

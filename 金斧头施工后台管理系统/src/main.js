@@ -1,6 +1,5 @@
 import './assets/main.less'
 import { createApp } from 'vue'
-import { createClient } from '@supabase/supabase-js'
 import App from './App.vue'
 import router from './router'
 import {
@@ -17,11 +16,12 @@ import {
 import 'ant-design-vue/dist/reset.css'
 import * as AntdIcons from '@ant-design/icons-vue'
 
-// 初始化Supabase客户端
+import { createClient } from '@supabase/supabase-js'
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 )
+app.provide('supabase', supabase)
 
 // 创建Vue实例
 const app = createApp(App)
@@ -55,7 +55,6 @@ Object.entries(icons).forEach(([name, component]) => {
 })
 
 // 配置全局属性
-app.config.globalProperties.$supabase = supabase
 
 // 挂载应用
 app.mount('#app')
