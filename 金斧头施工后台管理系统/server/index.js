@@ -1,53 +1,70 @@
-const express = require('express')
-const app = express()
-require('dotenv').config()
-const { createClient } = require('@supabase/supabase-js')
+import express from 'express'
+import { createClient } from '@supabase/supabase-js'
+import cors from 'cors'
+import jwt from 'jsonwebtoken'
 
-// 初始化Supabase客户端
+const app = express()
+app.use(express.json())
+app.use(cors({
+  origin: 'http://localhost:5173'
+}))
+
+// 加载环境变量
+import dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
+
+// 验证环境变量
+if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
+  throw new Error('缺少Supabase配置，请检查.env文件');
+}
+
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
+  process.env.VITE_SUPABASE_URL,
+  process.env.VITE_SUPABASE_ANON_KEY
 )
 
-app.use(express.json())
-app.use(require('cors')())
+// 认证中间件
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1]
+  if (!token) return res.status(401).json({ error: 'Unauthorized' })
 
-// 获取所有项目
-app.get('/api/projects', async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (error) throw error
-    res.json({ success: true, data })
+    req.user = jwt.verify(token, process.env.JWT_SECRET)
+    next()
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: '获取项目失败'
-    })
+    res.status(401).json({ error: 'Invalid token' })
   }
+}
+
+// 项目管理API
+app.get('/api/projects', authenticate, async (req, res) => {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('user_id', req.user.id)
+
+  if (error) return res.status(500).json({ error })
+  res.json(data)
 })
 
-// 创建新项目
-app.post('/api/projects', async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('projects')
-      .insert([req.body])
-      .select()
-    
-    if (error) throw error
-    res.json({ success: true, data: data[0] })
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: '创建项目失败'
-    })
+app.post('/api/projects', authenticate, async (req, res) => {
+  const project = {
+    ...req.body,
+    user_id: req.user.id,
+    created_at: new Date()
   }
+
+  const { data, error } = await supabase
+    .from('projects')
+    .insert(project)
+    .single()
+
+  if (error) return res.status(500).json({ error })
+  res.json(data)
 })
 
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000')
+// 启动服务器
+const PORT = 3000
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
 })
